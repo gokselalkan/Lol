@@ -1,11 +1,43 @@
-- name: Azure Kullanıcıya Owner Rolü Ata
+- name: Create Azure VM
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    resource_group_name: "azure-demo"
+    region: "eastus"
+    vnet_cidr: "10.0.0.0/16"
+    subnet_cidr: "10.0.1.0/24"
+    vnet_name: "demo_vnet"
+    subnet_name: "demo_subnet"
+    network_sec_group_name: "demo_sec_group"
+    vm_name: "test"
+    vm_size: "Standard_DS1_v2"
+    vm_sku: "8_7"
+    public_ip_name: "demo_ip"
+    nic_name: "demo_nic"
+    admin_user: "administrator"  # Kullanıcı adını değiştirin
+    admin_password: "123456789hH!x"  # Şifreyi değiştirin
+    survey_public_ip: "True"
   tasks:
-    - name: Sahiplik (Owner) Rolünü Ata
-      azure.azcollection.azure_rm_roleassignment:
-        role_definition_id: "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
-        assignee_object_id: "b5690262-fd56-473a-8ae0-b8f0684896f7"
-        scope: "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2"  # Abonelik kimliği
-        state: present
+    # Kaynak grubu, sanal ağ ve diğer görevler burada kalabilir
+
+    - name: Create VM
+      azure.azcollection.azure_rm_virtualmachine:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ vm_name }}"
+        managed_disk_type: "Standard_LRS"
+        vm_size: "{{ vm_size }}"
+        admin_username: "{{ admin_user }}"
+        admin_password: "{{ admin_password }}"
+        network_interfaces: "{{ nic_name }}"
+        ssh_password_enabled: true
+        tags:
+          "name": "{{ vm_name }}"
+          "demo": "true"
+          "os": "linux"
+          "username": "{{ admin_user }}"
+        image:
+          offer: RHEL
+          publisher: RedHat
+          sku: "{{ vm_sku }}"
+          version: latest
