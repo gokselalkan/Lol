@@ -1,13 +1,32 @@
----
-- name: Create Azure VM
+- name: Create Azure VM in azure-demo resource group
   hosts: localhost
-  tasks:
-    - name: Set Azure CLI Profile Path
-      shell: |
-        export AZURE_CONFIG_DIR="{{ ansible_env.HOME }}/.azure"
-      become: yes
+  connection: local
+  gather_facts: no
+  
+  vars:
+    resource_group: "azure-demo"
+    vm_name: "myVM"
+    location: "eastus"
+    admin_username: "azureuser"
+    image: "Debian"
+    vm_size: "Standard_DS1_v2"
+    ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"  # SSH public key dosyasının yolunu buraya yazın veya doğrudan bir anahtar da verebilirsiniz
 
-    - name: Create VM
-      shell: >
-        az vm create --resource-group azure-demo --name myVM --image Debian11 --admin-username azureuser --generate-ssh-keys
-      become: yes
+  tasks:
+    - name: Create resource group
+      azure.azcollection.azure_rm_resourcegroup:
+        name: "{{ resource_group }}"
+        location: "{{ location }}"
+
+    - name: Create virtual machine
+      azure.azcollection.azure_rm_virtualmachine:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vm_name }}"
+        location: "{{ location }}"
+        vm_size: "{{ vm_size }}"
+        storage_account_type: "Standard_LRS"
+        os_type: "Linux"
+        image: "{{ image }}"
+        admin_username: "{{ admin_username }}"
+        ssh_public_keys: "{{ ssh_key }}"
+        data_disks: []
