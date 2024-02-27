@@ -1,20 +1,11 @@
-- name: Azure demo kaynak grubunda 'yes' adında bir VM oluştur
+- name: Azure Kullanıcıya Owner Rolü Ata
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
   tasks:
-    - name: VM oluştur
-      azure_rm_virtualmachine:
-        subscription_id: "011bdceb-fdd1-45cf-8c50-d43e813634a2"  # Abonelik kimliğinizi girin
-        resource_group: azure-demo  # Kaynak grubu adınızı buraya girin
-        name: yes
-        vm_size: Standard_DS1_v2  # Sanal makine boyutunu seçin
-        admin_username: administrator  # Kullanıcı adı "administrator" olarak ayarlandı
-        admin_password: "123456789hH!x"  # Şifre belirtildi
-        image:
-          offer: UbuntuServer
-          publisher: Canonical
-          sku: 18.04-LTS
-          version: latest
-        state: present  # Sanal makineyi oluştur
-      when: "run_test in ['all', 'virtualmachine']"
+    - name: Sahiplik (Owner) Rolünü Ata
+      azure.azcollection.azure_rm_roleassignment:
+        role_definition_name: "Owner"
+        principal_name: "x9ulczqtx0yf-azureviewer@instruqt.io"
+        scope: "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2"  # Abonelik kimliği
+        state: present
