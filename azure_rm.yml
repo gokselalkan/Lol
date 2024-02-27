@@ -2,44 +2,53 @@
 - name: Create Azure VM
   hosts: localhost
   connection: local
+  gather_facts: false
+  vars:
+    resource_group_name: "azure-demo"
+    region: "eastus"
+    vnet_cidr: "10.0.0.0/16"
+    subnet_cidr: "10.0.1.0/24"
+    vnet_name: "demo_vnet"
+    subnet_name: "demo_subnet"
+    network_sec_group_name: "demo_sec_group"
+    vm_name: "myVM"
+    vm_size: "Standard_DS1_v2"
+    admin_username: "azureuser"
+    admin_password: "123456789!cC"
+    public_ip_name: "myVM-public-ip"
+    nic_name: "myVM-nic"
+    image_offer: "Debian"
+    image_publisher: "credativ"
+    image_sku: "debian-10"
+    image_version: "latest"
   tasks:
     - name: Create resource group
-      azure.azcollection.azure_rm_resourcegroup:
+      azure_rm_resourcegroup:
         name: "{{ resource_group_name }}"
         location: "{{ region }}"
 
     - name: Create virtual network
-      azure.azcollection.azure_rm_virtualnetwork:
+      azure_rm_virtualnetwork:
         resource_group: "{{ resource_group_name }}"
         name: "{{ vnet_name }}"
         address_prefixes: "{{ vnet_cidr }}"
 
     - name: Add subnet
-      azure.azcollection.azure_rm_subnet:
+      azure_rm_subnet:
         resource_group: "{{ resource_group_name }}"
         name: "{{ subnet_name }}"
         address_prefix: "{{ subnet_cidr }}"
-        virtual_network: "{{ vnet_name }}"
+        virtual_network_name: "{{ vnet_name }}"
 
     - name: Create public IP address
-      azure.azcollection.azure_rm_publicipaddress:
+      azure_rm_publicipaddress:
         resource_group: "{{ resource_group_name }}"
         allocation_method: Static
-        name: "{{ win_public_ip_name }}"
+        name: "{{ public_ip_name }}"
       register: output_ip_address
 
-    - name: Dump public IP for VM which will be created
-      debug:
-        msg: "The public IP is {{ output_ip_address.state.ip_address }}"
-
-    - name: Set Stat for Ansible Controller
-      set_stats:
-        data: 
-          azure_vm_public_ip: "{{ output_ip_address.state.ip_address }}"
-        per_host: false
-
-    - name: Create Network Security Group that allows SSH and RDP
-      azure.azcollection.azure_rm_securitygroup:
+    - name: Create Network Security Group that allows SSH
+      azure_rm_securitygroup:
         resource_group: "{{ resource_group_name }}"
         name: "{{ network_sec_group_name }}"
         rules:
@@ -49,49 +58,27 @@
             access: Allow
             priority: 1001
             direction: Inbound
-          - name: RDP
-            protocol: Tcp
-            destination_port_range: 3389
-            access: Allow
-            priority: 1002
-            direction: Inbound
 
     - name: Create virtual network interface card
-      azure.azcollection.azure_rm_networkinterface:
+      azure_rm_networkinterface:
         resource_group: "{{ resource_group_name }}"
-        name: "{{ win_nic_name }}"
-        virtual_network: "{{ vnet_name }}"
-        subnet: "{{ subnet_name }}"
-        public_ip_name: "{{ win_public_ip_name }}"
+        name: "{{ nic_name }}"
+        virtual_network_name: "{{ vnet_name }}"
+        subnet_name: "{{ subnet_name }}"
+        public_ip_name: "{{ public_ip_name }}"
         security_group: "{{ network_sec_group_name }}"
 
-    # - name: Create storage account
-    #   azure.azcollection.azure_rm_storageaccount:
-    #     resource_group: "{{ resource_group_name }}"
-    #     name: "{{ win_vm_name_sa }}"
-    #     type: "Standard_LRS"
-    #     state: present
-
     - name: Create VM
-      azure.azcollection.azure_rm_virtualmachine:
+      azure_rm_virtualmachine:
         resource_group: "{{ resource_group_name }}"
-        name: "{{ win_vm_name }}"
-        os_type: "Windows"
-        vm_size: "{{ win_vm_size }}"
-        managed_disk_type: Standard_LRS
-        admin_username: "{{ win_admin_user }}"
-        admin_password: "{{ win_admin_password }}"
-        network_interfaces: "{{ win_nic_name }}"
-        # storage_account_name: "{{ win_vm_name_sa }}"
-        os_disk_name: "winos"
-        os_disk_size_gb: "150"
-        ssh_password_enabled: "false"
-        tags:
-          "demo": "true"
-          "os": "windows"
+        name: "{{ vm_name }}"
+        vm_size: "{{ vm_size }}"
+        admin_username: "{{ admin_username }}"
+        admin_password: "{{ admin_password }}"
+        network_interfaces:
+          - name: "{{ nic_name }}"
         image:
-          offer: WindowsServer
-          publisher: MicrosoftWindowsServer
-          sku: "{{ win_vm_sku }}"
-          version: latest
-#
+          offer: "{{ image_offer }}"
+          publisher: "{{ image_publisher }}"
+          sku: "{{ image_sku }}"
+          version: "{{ image_version }}"
