@@ -22,11 +22,6 @@
     image_sku: "debian-10"
     image_version: "latest"
   tasks:
-    - name: Create resource group
-      azure_rm_resourcegroup:
-        name: "{{ resource_group_name }}"
-        location: "{{ region }}"
-
     - name: Create virtual network
       azure_rm_virtualnetwork:
         resource_group: "{{ resource_group_name }}"
