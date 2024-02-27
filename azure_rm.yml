@@ -1,32 +1,83 @@
-- name: Create Azure VM in azure-demo resource group
+---
+- name: Create Azure VM
   hosts: localhost
   connection: local
-  gather_facts: no
-  
+  gather_facts: false
   vars:
-    resource_group: "azure-demo"
+    resource_group_name: "azure-demo"
+    region: "eastus"
+    vnet_cidr: "10.0.0.0/16"
+    subnet_cidr: "10.0.1.0/24"
+    vnet_name: "demo_vnet"
+    subnet_name: "demo_subnet"
+    network_sec_group_name: "demo_sec_group"
     vm_name: "myVM"
-    location: "eastus"
-    admin_username: "azureuser"
-    image: "Debian"
     vm_size: "Standard_DS1_v2"
-    ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"  # SSH public key dosyasının yolunu buraya yazın veya doğrudan bir anahtar da verebilirsiniz
-
+    admin_username: "azureuser"
+    admin_password: "123456789!cC"
+    public_ip_name: "myVM-public-ip"
+    nic_name: "myVM-nic"
+    image_offer: "Debian"
+    image_publisher: "credativ"
+    image_sku: "debian-10"
+    image_version: "latest"
   tasks:
     - name: Create resource group
       azure.azcollection.azure_rm_resourcegroup:
-        name: "{{ resource_group }}"
-        location: "{{ location }}"
+        name: "{{ resource_group_name }}"
+        location: "{{ region }}"
 
-    - name: Create virtual machine
+    - name: Create virtual network
+      azure.azcollection.azure_rm_virtualnetwork:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ vnet_name }}"
+        address_prefixes: "{{ vnet_cidr }}"
+
+    - name: Add subnet
+      azure.azcollection.azure_rm_subnet:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ subnet_name }}"
+        address_prefix: "{{ subnet_cidr }}"
+        virtual_network: "{{ vnet_name }}"
+
+    - name: Create public IP address
+      azure.azcollection.azure_rm_publicipaddress:
+        resource_group: "{{ resource_group_name }}"
+        allocation_method: Static
+        name: "{{ public_ip_name }}"
+      register: output_ip_address
+
+    - name: Create Network Security Group that allows SSH
+      azure.azcollection.azure_rm_securitygroup:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ network_sec_group_name }}"
+        rules:
+          - name: SSH
+            protocol: Tcp
+            destination_port_range: 22
+            access: Allow
+            priority: 1001
+            direction: Inbound
+
+    - name: Create virtual network interface card
+      azure.azcollection.azure_rm_networkinterface:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ nic_name }}"
+        virtual_network: "{{ vnet_name }}"
+        subnet: "{{ subnet_name }}"
+        public_ip_name: "{{ public_ip_name }}"
+        security_group: "{{ network_sec_group_name }}"
+
+    - name: Create VM
       azure.azcollection.azure_rm_virtualmachine:
-        resource_group: "{{ resource_group }}"
+        resource_group: "{{ resource_group_name }}"
         name: "{{ vm_name }}"
-        location: "{{ location }}"
         vm_size: "{{ vm_size }}"
-        storage_account_type: "Standard_LRS"
-        os_type: "Linux"
-        image: "{{ image }}"
         admin_username: "{{ admin_username }}"
-        ssh_public_keys: "{{ ssh_key }}"
-        data_disks: []
+        admin_password: "{{ admin_password }}"
+        network_interfaces: "{{ nic_name }}"
+        image:
+          offer: "{{ image_offer }}"
+          publisher: "{{ image_publisher }}"
+          sku: "{{ image_sku }}"
+          version: "{{ image_version }}"
