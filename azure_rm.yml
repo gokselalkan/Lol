@@ -9,11 +9,8 @@
         resource_group: azure-demo  # Kaynak grubu adınızı buraya girin
         name: yes
         vm_size: Standard_DS1_v2  # Sanal makine boyutunu seçin
-        admin_username: azureuser  # Yönetici kullanıcı adınızı belirleyin
-        ssh_password_enabled: false  # SSH şifre tabanlı kimlik doğrulamasını etkinleştirin
-        ssh_public_keys:
-          - path: /home/azureuser/.ssh/authorized_keys
-            key_data: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"  # SSH anahtarınızın yolunu belirtin
+        admin_username: administrator  # Kullanıcı adı "administrator" olarak ayarlandı
+        admin_password: "123456789hH!x"  # Şifre belirtildi
         image:
           offer: UbuntuServer
           publisher: Canonical
