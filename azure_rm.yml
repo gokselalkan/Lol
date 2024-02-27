@@ -1,43 +1,13 @@
+---
 - name: Create Azure VM
   hosts: localhost
-  connection: local
-  gather_facts: false
-  vars:
-    resource_group_name: "azure-demo"
-    region: "eastus"
-    vnet_cidr: "10.0.0.0/16"
-    subnet_cidr: "10.0.1.0/24"
-    vnet_name: "demo_vnet"
-    subnet_name: "demo_subnet"
-    network_sec_group_name: "demo_sec_group"
-    vm_name: "test"
-    vm_size: "Standard_DS1_v2"
-    vm_sku: "8_7"
-    public_ip_name: "demo_ip"
-    nic_name: "demo_nic"
-    admin_user: "administrator"  # Kullanıcı adını değiştirin
-    admin_password: "123456789hH!x"  # Şifreyi değiştirin
-    survey_public_ip: "True"
   tasks:
-    # Kaynak grubu, sanal ağ ve diğer görevler burada kalabilir
+    - name: Set Azure CLI Profile Path
+      shell: |
+        export AZURE_CONFIG_DIR="{{ ansible_env.HOME }}/.azure"
+      become: yes
 
     - name: Create VM
-      azure.azcollection.azure_rm_virtualmachine:
-        resource_group: "{{ resource_group_name }}"
-        name: "{{ vm_name }}"
-        managed_disk_type: "Standard_LRS"
-        vm_size: "{{ vm_size }}"
-        admin_username: "{{ admin_user }}"
-        admin_password: "{{ admin_password }}"
-        network_interfaces: "{{ nic_name }}"
-        ssh_password_enabled: true
-        tags:
-          "name": "{{ vm_name }}"
-          "demo": "true"
-          "os": "linux"
-          "username": "{{ admin_user }}"
-        image:
-          offer: RHEL
-          publisher: RedHat
-          sku: "{{ vm_sku }}"
-          version: latest
+      shell: >
+        az vm create --resource-group azure-demo --name myVM --image Debian11 --admin-username azureuser --generate-ssh-keys
+      become: yes
