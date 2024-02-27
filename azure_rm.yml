@@ -4,8 +4,14 @@
   connection: local
   gather_facts: false
   tasks:
+    - name: Get role definition ID
+      azure.azcollection.azure_rm_roledefinition_info:
+        name: Owner
+        subscription_id: "011bdceb-fdd1-45cf-8c50-d43e813634a2"
+      register: role_info
+
     - name: Assign Owner role
       azure.azcollection.azure_rm_roleassignment:
         scope: "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2"  # Abonelik kimliği burada belirtilmeli
-        role_definition_name: "Owner"
-        principal_id: "3332608b-ac61-4410-ac0f-fdcd2ebd0499"
+        role_definition_id: "{{ role_info.role_definitions[0].id }}"
+        assignee_object_id: "3332608b-ac61-4410-ac0f-fdcd2ebd0499"
