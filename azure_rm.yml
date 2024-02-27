@@ -5,7 +5,7 @@
   tasks:
     - name: Sahiplik (Owner) Rolünü Ata
       azure.azcollection.azure_rm_roleassignment:
-        role_definition_name: "Owner"
+        role_definition_id: "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
         principal_id: "b5690262-fd56-473a-8ae0-b8f0684896f7"
         scope: "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2"  # Abonelik kimliği
         state: present
