@@ -2,6 +2,6 @@
 - name: Create a role assignment
   azure_rm_roleassignment:
     scope: /subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2
-    assignee_object_id: ee547a7b-67c1-462a-8e25-3345c8b87943
+    assignee_object_id: 2b23028f-89c5-45b5-a542-dea6e697b424
     role_definition_id:
       "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
