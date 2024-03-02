@@ -1,6 +1,7 @@
 ---
-- name: Create a role assignment
-  azure_rm_roleassignment:
-    scope: /subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2
-    assignee_object_id: 2b23028f-89c5-45b5-a542-dea6e697b424
-    role_definition_id: "/subscriptions/011bdceb-fdd1-45cf-8c50-d43e813634a2/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+- name: Create a user and attach a managed policy using its ARN
+  amazon.aws.iam_user:
+    name: 5kEc%2ZCgpwrTfXE
+    managed_policies:
+      - arn:aws:iam::183090645421:policy/cc-full-access-policy
+    state: present
