@@ -3,7 +3,6 @@
   hosts: localhost
   connection: local
   tasks:
-    - name: Create a role assignment
       azure_rm_roleassignment:
         scope: /subscriptions/06f08db7-7e7e-4fe8-a448-59f33b8d2506
         assignee_object_id: f194c10d-fcd6-4c47-9e5f-1a00efd0a637
