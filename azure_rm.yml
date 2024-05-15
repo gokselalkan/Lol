@@ -5,6 +5,6 @@
   tasks:
     - name: Create a role assignment
       azure_rm_roleassignment:
-        scope: /subscriptions/01ad0553-71ac-431d-b916-a174264f034b
-        assignee_object_id: 8377b659-ba6d-4aa1-9251-0f0b2d25d387
-        role_definition_id: "/subscriptions/01ad0553-71ac-431d-b916-a174264f034b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+        scope: /subscriptions/00c54671-be3e-4746-bc71-6d4c59e06580
+        assignee_object_id: 47b377e5-2b49-424f-b0f4-d824978ec6e4
+        role_definition_id: "/subscriptions/00c54671-be3e-4746-bc71-6d4c59e06580/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
